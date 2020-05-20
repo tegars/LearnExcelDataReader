@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ExcelDataReader;
+using LearnExcelDataReader.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +40,35 @@ namespace LearnExcelDataReader.Controllers
                 }
             }
             return Ok(text);
+        }
+        [HttpGet("WithMapping")]
+        public ActionResult WithMapping()
+        {
+            List<Product> products = new List<Product>();
+            bool first = true;
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            using (var stream = System.IO.File.Open("Files/Book1.xlsx", FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    while (reader.Read())
+                    {
+                        if (first)
+                            first = false;
+                        else
+                        {
+                            var product = new Product()
+                            {
+                                Name = reader.GetValue(0).ToString(),
+                                Price = reader.GetValue(1).ToString(),
+                                Description = reader.GetValue(2).ToString()
+                            };
+                            products.Add(product);
+                        }
+                    }
+                }
+            }
+            return Ok(products);
         }
     }
 }
